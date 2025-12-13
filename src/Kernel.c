@@ -29,7 +29,7 @@ void kmain() {
       } else if (c == '\b' || c == 127) { // 处理退格
         if (pos) {
           pos--;
-          vga_write(" ");
+          screen_deleteAChar();
         }
       } else {
         if (pos < sizeof(buf) - 1) {

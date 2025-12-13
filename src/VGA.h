@@ -40,6 +40,19 @@ void clear_screen() {
   vga_row = 0;
   vga_col = 0;
 }
+//取消一个字符的显示
+void screen_deleteAChar() {
+  if (vga_col == 0 && vga_row == 0)
+    return; // 已经在最开始位置，不能删除
+  if (vga_col == 0) {
+    vga_row--;
+    vga_col = VGA_WIDTH - 1;
+  } else {
+    vga_col--;
+  }
+  size_t idx = vga_row * VGA_WIDTH + vga_col;
+  vga_buffer[idx] = make_vga_entry(' ', current_color); // 用空格覆盖
+}
 
 void vga_write(const char *s) {
   for (const char *p = s; *p; ++p)
