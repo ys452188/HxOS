@@ -1,0 +1,27 @@
+.set ALIGN, 1<<0   /*内存对齐*/
+.set MEMINFO, 1<<1 /*内存信息*/
+.set FLAGS, ALIGN | MEMINFO /*标志位*/
+.set MAGIC, 0x1BADB002 /*多重引导魔数*/
+.set CHECKSUM, -(MAGIC + FLAGS) /*校验和*/
+
+.section .multiboot
+.align 4
+.long MAGIC          /*多重引导魔数*/
+.long FLAGS          /*标志位*/
+.long CHECKSUM      /*校验和*/
+
+.section .text
+.global _start
+.type _start, @function
+
+_start:
+    movl %ebx, multiboot_info_ptr /*保存多重引导信息指针*/
+    call kmain                   /*调用内核主函数*/
+1:
+    hlt                         /*停止CPU*/
+    jmp 1b                      /*无限循环*/
+
+    .section .bss
+    .align 4
+multiboot_info_ptr:
+    .long 0                     /*多重引导信息指针*/
