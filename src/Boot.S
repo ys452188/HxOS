@@ -16,6 +16,8 @@
 
 _start:
     movl %ebx, multiboot_info_ptr /*保存多重引导信息指针*/
+    /*设置栈指针 */
+    movl $stack_top, %esp
     call kmain                   /*调用内核主函数*/
 1:
     hlt                         /*停止CPU*/
@@ -25,3 +27,7 @@ _start:
     .align 4
 multiboot_info_ptr:
     .long 0                     /*多重引导信息指针*/
+stack_bottom:
+    /*分配约16MB的栈空间*/
+    .skip 16384000
+stack_top:
