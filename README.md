@@ -108,7 +108,8 @@ HxOS 的启动是一个从汇编到 C 语言的交接过程，具体流程如下
 │   ├── VGA.h        # 显卡文本模式驱动
 │   ├── Keyboard.h   # 键盘轮询驱动及扫描码映射
 │   └── Inout.h      # 端口 I/O 汇编内联函数
-├── grub.cfg         # GRUB 引导配置文件
+├── product/boot/grub
+│               └──grub.cfg   # GRUB 引导配置文件
 ├── linker.ld        # 链接脚本，定义内存布局 (0x100000)
 ├── 编译.sh          # 自动构建脚本
 └── README.md        # 项目说明文档
