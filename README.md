@@ -1,127 +1,61 @@
-# HxOS - A Simple Hobby x86 Kernel
+# HxOS - 极简 x86 业余操作系统内核  By CuSO4isVeryNice
 
-**HxOS** 是一个轻量级的 x86 操作系统内核，由 **cuso4IsVeryNice (Xianghan.Huang)** 开发。是一个用于学习操作系统原理的 Hobby OS，它实现了Multiboot引导兼容、基本的VGA文本显示、PS/2键盘驱动以及一个简陋的交互式Shell。
+HxOS 是一个从零开始开发的、运行在 x86 架构上的 32 位爱好者操作系统内核。本项目实现了从 BIOS 引导、开启 A20 总线、进入保护模式，到内核 C 语言环境运行的完整链条。
 
-## ✨ 功能特性 (Features)
+## 🚀 项目特性
 
-* **Multiboot 兼容**: 符合 Multiboot 1 规范，由 GRUB 直接引导。
-* 
-**VGA 驱动**: 支持 80x25 文本模式显存直接操作(MMIO 0xB8000) 。
+* **自主引导**：自定义汇编引导程序（Bootloader），不依赖 GRUB。
+* **混合编程**：引导部分使用 NASM 汇编，内核主体使用 C 语言编写。
+* **内存布局**：精确控制的链接脚本，确保内核加载至物理内存 `1MB` 处。
+* **VGA 驱动**：支持文本模式下的屏幕清屏、单字符输出及字符串格式化输出。
+* **键盘驱动**：实现基于轮询模式的 PS/2 键盘输入处理。
+* **构建系统**：基于 LLVM 链（Clang, lld, llvm-objcopy）的构建脚本。
 
+## 📂 目录结构
 
-* 
-**键盘驱动**: 基于端口 I/O (0x60/0x64) 的 PS/2 键盘轮询 (Polling) 驱动 。
+| 文件 | 描述 |
+| --- | --- |
+| `src/Bootloader.asm` | 引导程序，负责 16 位到 32 位跳转及内核加载 |
+| `src/Kernel.c` | 内核入口点 `kmain` 所在地，包含 BSS 清理逻辑 |
+| `src/VGA.h` | 字符缓冲区驱动，处理 0xB8000 地址处的显存写入 |
+| `src/Keyboard.h` | 键盘扫描码映射及简单的 IO 轮询实现 |
+| `src/Inout.h` | 封装了汇编指令 `in` 和 `out` 的内联函数 |
+| `linker.ld` | 链接脚本，定义内存布局，解决稀疏镜像问题 |
+| `编译.sh` | 自动构建脚本，从源码到生成 ISO 镜像 |
 
+## 🛠️ 环境依赖
 
-* **内置 Shell**:
-* 支持命令解析与执行。
-* 支持退格键 (Backspace) 删除字符 。
+在编译本项目之前，请确保您的开发环境已安装以下工具：
 
+* **编译器**: `Clang` (支持交叉编译为 `i386-pc-none-elf`)
+* **汇编器**: `NASM`
+* **链接器**: `ld.lld` (LLVM 链接器)
+* **工具链**: `llvm-objcopy`
+* **镜像制作**: `xorriso` (用于生成 .iso 镜像)
+* **模拟器**: `QEMU` (用于运行和调试)
 
-* 内置命令: `help`, `echo`, `clear` 。
+## 🔨 构建与运行
 
-
-
-
-
-## 🛠️ 开发环境 (Prerequisites)
-
-* **编译器**: `clang` (目标架构: `i386-pc-none-elf`)
-* **链接器**: `ld.lld`
-* **构建工具**: `make` (可选) 或直接使用 Shell 脚本
-* **ISO 制作**: `grub-mkrescue`, `xorriso`
-
-**编译内核**:
-运行提供的编译脚本生成 ELF 文件和 ISO 镜像。
+1. **赋予脚本执行权限**:
 ```bash
-sh 编译.sh
+chmod +x 编译.sh
 
 ```
-
-
-该脚本会执行以下步骤:
-* 编译 `src/Boot.S` 为 `boot.o`
-* 编译 `src/Kernel.c` 为 `kernel.o`
-* 链接生成 `kernel.elf`
-* 打包生成 `HxOS.iso`
-
-
-
-## ⚙️ 系统启动流程 (Boot Process)
-
-HxOS 的启动是一个从汇编到 C 语言的交接过程，具体流程如下：
-
-### 1. BIOS/GRUB 阶段
-
-* 计算机上电，BIOS 加载引导加载程序 (GRUB)。
-* GRUB 读取 `product/boot/kernel.elf`，检测到 `Boot.S` 前端的 **Multiboot Header** (魔数 `0x1BADB002`) 。
-
-
-* GRUB 将计算机置于 **32位保护模式**，并将控制权移交给 `linker.ld` 中定义的入口点 `_start` 。
-
-
-
-### 2. 汇编引导阶段 (`Boot.S`)
-
-* 
-**入口**: CPU 跳转到 `_start` 标签 。
-
-
-* **环境准备**:
-* 设置内核栈指针 (`esp`)，为 C 语言函数调用提供栈空间。
-* 保存 Multiboot 信息结构体的指针 (`ebx` 寄存器) 到 `multiboot_info_ptr` 变量 。
-
-
-
-
-* **跳转**: 执行 `call kmain` 指令，正式进入 C 语言内核环境。
-
-### 3. 内核初始化阶段 (`Kernel.c`)
-
-* **进入 `kmain()**`:
-* 调用 `vga_write` 打印欢迎标语 "HxOS - welcome!" 。
-
-
-* 初始化 Shell 提示符 "HxOS=> "。
-
-
-
-### 4. 主循环阶段 (The Loop)
-
-* 内核进入无限 `while(1)` 循环。
-* 
-**轮询键盘**: 调用 `keyboard_getchar_poll()` 不断检查 `0x64` 端口状态，当有按键按下时从 `0x60` 端口读取扫描码并转换为 ASCII 字符 。
-
-
-* 
-**命令解析**: 读取用户输入到缓冲区，当检测到回车键时，解析命令并执行相应逻辑 (`help`, `clear`, `echo`) 。
-
-
-
-## 📂 文件结构 (File Structure)
-
-```text
-.
-├── src/
-│   ├── Boot.S       # 内核汇编入口，包含 Multiboot 头
-│   ├── Kernel.c     # 内核主函数，Shell 逻辑实现
-│   ├── VGA.h        # 显卡文本模式驱动
-│   ├── Keyboard.h   # 键盘轮询驱动及扫描码映射
-│   └── Inout.h      # 端口 I/O 汇编内联函数
-├── product/boot/grub
-│               └──grub.cfg   # GRUB 引导配置文件
-├── linker.ld        # 链接脚本，定义内存布局 (0x100000)
-├── 编译.sh          # 自动构建脚本
-└── README.md        # 项目说明文档
+2. **编译**:
+该脚本会自动完成内核编译、链接、裸二进制转换及 ISO 镜像合成。
+```bash
+./编译.sh
 
 ```
+3. **使用 QEMU 运行**:
+```bash
+qemu-system-i386 -cdrom HxOS.iso
 
-## 📝 待办事项 (To-Do)
+```
+## ⚠️ 开发注意事项（避坑指南）
 
-* [ ] **中断处理 (IDT)**: 从键盘轮询 (Polling) 升级为中断驱动 (Interrupts)。
-* [ ] **VGA 滚屏**: 实现屏幕写满后的自动滚屏逻辑。
-* [ ] **内存管理**: 实现物理内存分配器 (PMM)。
+* **SSE 异常**: 内核编译时必须开启 `-mno-sse` 选项，否则 Clang 优化的向量化指令会导致未初始化 SSE 寄存器的环境下发生 Triple Fault。
+* **BSS 段初始化**: 裸二进制文件（.bin）不包含 BSS 段，必须在 `kmain` 开始处手动调用 `clean_bss()`。
+* **内存对齐**: 在链接脚本中避免对 `.text` 以外的段过度使用 `ALIGN(4K)`，以减小镜像体积并防止地址偏移错乱。
 
----
-
-**Happy Hacking!**
+## 📜 许可证

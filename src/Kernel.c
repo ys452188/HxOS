@@ -7,10 +7,23 @@
 
 // 简单实现 memcmp
 int memcmp(const void *a, const void *b, size_t n);
-void vga_write(const char *);
+void vga_write(const char*);
 char keyboard_getchar_poll();
-
+// 声明 linker.ld 中的符号
+extern char __bss_start[];
+extern char __bss_end[];
+// 手动清空 BSS 段的函数
+void clean_bss() {
+    char* p = __bss_start;
+    while (p < __bss_end) {
+        *p = 0;
+        p++;
+    }
+}
+__attribute__((section(".text.kmain")))    //使kernel.bin[0]是kmain的第一条指令
 void kmain() {
+	clean_bss();
+	clear_screen();
   vga_write("HxOS - welcome!\n");
   vga_write("-------------------\n");
   vga_write("A simple hobby OS kernel\nBy cuso4IsVeryNice(Xianghan.Huang)\n");
@@ -52,6 +65,10 @@ void kmain() {
     } else {
       vga_write("Unknown command\n");
     }
+  }
+  while(1) {
+    //使用 hlt 指令让 CPU 暂停，降低功耗，直到下一个中断到来
+    __asm__ volatile("hlt");
   }
 }
 
