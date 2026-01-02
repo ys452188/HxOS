@@ -64,7 +64,24 @@ void screen_deleteAChar() {
 void vga_write(const char* msg) {
     if (!msg) return;
     for (const char* p = msg; *p; ++p) {
-        vga_putc(*p);
+    	if (p[0] == '\x1b' && p[1] == '[' &&
+    	p[2] == '3' && p[4] == 'm') {
+    		switch (p[3]) {
+        		case '1': setColor(0x04); break; // 红
+        		case '2': setColor(0x02); break; // 绿
+        		case '3': setColor(0x0E); break; // 黄
+        		case '4': setColor(0x01); break; // 蓝
+        		case '7': setColor(0x0F); break; // 白
+    		}
+    		p += 4;
+    		continue;
+    	} else if(p[0] == '\x1b' && p[1] == '[' &&
+    	p[2] == '0' && p[3] == 'm') {
+    		setColor(0x0F);
+    		p+=3;
+    	} else {
+        	vga_putc(*p);
+        }
     }
 }
 #endif

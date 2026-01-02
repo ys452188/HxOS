@@ -42,7 +42,7 @@ uint64_t getTotalUsableMemorySize(void) {
 HeapMemoryHeader* heap_begin = NULL;
 //初始化
 void initHeapMemory(uint32_t total_size) {
-	vga_write("init heap...\n");
+	//vga_write("init heap...\n");
     // 将堆放在内核代码之后
     heap_begin = (HeapMemoryHeader *)__kernel_end;
     // 初始化第一个大块

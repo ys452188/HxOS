@@ -10,7 +10,7 @@
 #include <stdint.h>
 int memcmp(const void *a, const void *b, size_t n);
 void hxsh(void) {
-	vga_write("HxOS=> ");
+	vga_write("\33[32m[HxOS]\33[0m_________________________\n|==>");
     char* buf = hxMalloc(128);
   	if(!buf) {
   		vga_write("[ERR] Memory alloction fault!\n");

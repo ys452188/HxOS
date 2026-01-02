@@ -28,8 +28,10 @@ void kmain() {
   displayHXOSIcon();
   uint64_t usableMemorySize = getTotalUsableMemorySize();   //获取可用内存大小
   initHeapMemory(usableMemorySize);
-  sleep_busyWait(1145);
+  sleep_busyWait(2333);
   clearScreen();
+  sleep_busyWait(1145);
+  displayHXOSIcon();
   vga_write("HxOS - welcome!\n");
   vga_write("usableMemorySize:");
   putUInt64(usableMemorySize);
