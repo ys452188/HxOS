@@ -60,7 +60,7 @@ void hxsh(void) {
       vga_write("\n");
     } else if (memcmp(buf, "icon", 4) == 0) {
       displayHXOSIcon();
-    }else {
+    } else {
       vga_write("Unknown command\n");
     }
     
