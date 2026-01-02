@@ -6,8 +6,8 @@ clang \
   -ffreestanding \
   -fno-stack-protector \
   -fno-pic \
-  -mno-sse -mno-sse2 -mno-mmx \
-  -O0 \
+  -mno-sse -mno-sse2 -mno-mmx -mno-80387\
+  -O2 \
   -Wall -Wextra \
   -c src/Kernel.c \
   -o kernel.o
@@ -39,4 +39,4 @@ xorriso -as mkisofs \
   -o HxOS.iso \
   ISO
 
-rm boot.img kernel.bin kernel.elf kernel.o
+#rm boot.img kernel.bin kernel.elf kernel.o

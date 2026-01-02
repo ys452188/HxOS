@@ -1,3 +1,5 @@
+#ifndef HXOS_VGA_H
+#define HXOS_VGA_H
 #include <stddef.h>
 #include <stdint.h>
 
@@ -8,22 +10,26 @@ static size_t vga_col = 0;
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 static uint8_t current_color = 0x0F; // 黑底白字
-void clear_screen(void);
+void clearScreen(void);
 
-static uint16_t make_vga_entry(char c, uint8_t color) {
+static uint16_t makeVGAEntry(char c, uint8_t color) {
     return ((uint16_t)color << 8) | (uint8_t)c;
 }
-
+void setColor(uint8_t color) {
+	current_color = color;
+	return;
+}
+__attribute__((noinline))
 void vga_putc(char c) {
   if (c == '\n') {
     vga_col = 0;
     vga_row++;
     if (vga_row >= VGA_HEIGHT)
-      clear_screen();
+      clearScreen();
     return;
   }
   size_t idx = vga_row * VGA_WIDTH + vga_col;
-  VGA_BUFFER[idx] = make_vga_entry(c, current_color);
+  VGA_BUFFER[idx] = makeVGAEntry(c, current_color);
   vga_col++;
   if (vga_col >= VGA_WIDTH) {
     vga_col = 0;
@@ -33,9 +39,9 @@ void vga_putc(char c) {
   }
 }
 
-void clear_screen(void) {
+void clearScreen(void) {
     for (size_t i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
-        VGA_BUFFER[i] = make_vga_entry(' ', current_color);
+        VGA_BUFFER[i] = makeVGAEntry(' ', current_color);
     }
     vga_row = 0;
     vga_col = 0;
@@ -52,14 +58,13 @@ void screen_deleteAChar() {
     vga_col--;
   }
   size_t idx = vga_row * VGA_WIDTH + vga_col;
-  VGA_BUFFER[idx] = make_vga_entry(' ', current_color); // 用空格覆盖
+  VGA_BUFFER[idx] = makeVGAEntry(' ', current_color); // 用空格覆盖
 }
 
 void vga_write(const char* msg) {
-  if(!msg) return;
-  if(*msg == '\0') return;
-  char* p = msg;
-  vga_putc(*p);
-  p++;
-  vga_write(p);
+    if (!msg) return;
+    for (const char* p = msg; *p; ++p) {
+        vga_putc(*p);
+    }
 }
+#endif

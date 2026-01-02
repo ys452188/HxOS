@@ -6,7 +6,7 @@ SECTIONS
 
     /* 代码段 */
     .text : {
-        *(.text.kmain)  /* 确保 kmain 在最前 */
+        KEEP(*(.text.kmain))  /* 确保 kmain 在最前 */
         *(.text*)
     }
 

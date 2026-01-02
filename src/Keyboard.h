@@ -1,3 +1,4 @@
+#pragma once
 #include "Inout.h"
 #include <stdint.h>
 
@@ -17,7 +18,7 @@ static const char scancode_map[128] = {
   0,   0,   0,    0,    0,    0,    0,    0
 };
 
-char keyboard_getchar_poll() {
+char keyboardGetCharPoll() {
   while (1) {
     uint8_t status = inb(0x64);
     if (status & 1) {
